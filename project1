@@ -1,0 +1,115 @@
+# regular expressions library for email and password validation
+import re
+
+# our required pattern for email address
+regex = r'[a-z A-Z][\w\._a-z A-Z]+[@]\w+[\.][\w]{2,3}'
+
+# register function to register our credentials after they satisfy our requirements
+def register():
+    db = open('credentialsdb.txt','w+')
+    db = open('credentialsdb.txt','r')
+    Email = input('Enter your email address :')
+    if (re.fullmatch(regex,Email)):
+        print('Email address is valid !')
+        Password = input('Enter your password :')
+        Password1 = input('Enter your password to confirm :')
+        
+        emaillist = []
+        pwlist = []
+        
+        for i in db:
+            a,b=i.split(',')
+            b=b.strip()
+            emaillist.append(a)
+            pwlist.append(b)
+            global data
+        data = dict(zip(emaillist,pwlist))
+        #print(data)
+    else:
+        print('\nEmail address should meet the following requirements. Please try again !')
+        print('''
+                 * Should not start with special character or a number\n
+                 * Should have "@" and "." in the following order\n
+                 * "@" should not be immediately followed by a "."
+                 ''')
+        register()
+
+    if Password != Password1:
+        print('Passwords do not match. Please try again !')
+        register()
+    else:
+        if ((re.search("[a-z]", Password)) and re.search("[A-Z]", Password) and re.search("[0-9]", Password) and (len(Password)>=5 and len(Password)<=16) and re.search("[`~!@#$%^&*:<,>.?/'\']", Password)):
+            db = open('credentialsdb.txt', 'a')
+            db.write(Email+','+Password+'\n')
+            print('\nRegistration successful. Please proceed to login !')
+        else:
+            print('\nPassword should meet the following requirements. Please try again !')
+            print('''
+                # Password should be 5 to 16 characters long\n
+                # Must have a minimum of\n
+                    # one uppercase\n
+                    # one lowercase\n
+                    # one digit\n
+                    # one special character\n
+                ''')
+            register()
+
+# access function to log into the portal
+# accepts email address as input
+# if email exists in the dictionary 'data', then password is asked as input
+# if password matches with the stored value, success message is displayed
+
+def access():
+    global data
+    #print(data)
+    db = open('credentialsdb.txt','r')
+    Email = input('\nEnter your email address :')
+    
+    emaillist = []
+    pwlist = []
+    for i in db:
+        a,b=i.split(',')
+        b=b.strip()
+        emaillist.append(a)
+        pwlist.append(b)
+    data = dict(zip(emaillist,pwlist))
+        
+    if Email in data:
+        Password = input('Enter your password:')
+        if Password == data[Email]:
+            print('Login Success !')
+            print('Hi,',Email)
+        else:
+            print('Incorrect password. Please check !')
+            access()
+    else:
+        print("Your email address does not exist !")
+        register()
+        
+# forgotpass function helps the user to recover the password
+# user can simply type in his email address and press enter
+def forgotpass():
+    print()
+    Email = input('Enter your email address :')
+    if Email in data:
+        print('Your password : ', data.get(Email))
+    else:
+        register()
+
+# home function accepts only three inputs i.e. 'Login', 'Register', 'Forgot Password'
+# depending on the input the corresponding function is initialized
+# if the user does not enter any of the given options, home function is initialized again
+# the user cannot proceed further if the user enters any random value
+
+def home():
+    option = input('Register | Login | Forgot Password ')
+    if option == 'Login':
+        access()
+    elif option == 'Register':
+        register()
+    elif option == 'Forgot Password':
+        forgotpass()
+    else:
+        print('Please enter an option !')
+        home()
+home()
